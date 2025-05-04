@@ -58,6 +58,10 @@ class VectorTileLoadingCache {
       CancellationCallback cancelled, bool cachedOnly) async {
     final cached = _tileDataCache.get(key);
     if (cached != null) {
+      GatherLogger.info(
+        'VectorTileLoadingCache',
+        'Using tile cache for tile: $key',
+      );
       return cached;
     }
     var future =
@@ -66,6 +70,10 @@ class VectorTileLoadingCache {
     if (future == null) {
       final provider = _providers.get(source);
       if (tile.z < provider.minimumZoom) {
+        GatherLogger.error(
+          'VectorTileLoadingCache',
+          'Defaulting to empty tile',
+        );
         return _emptyTile();
       }
       loaded = true;
@@ -78,8 +86,13 @@ class VectorTileLoadingCache {
     }
     Uint8List? bytes;
     try {
+      GatherLogger.info(
+        'VectorTileLoadingCache',
+        'Loading tile key: $key',
+      );
       bytes = await future;
     } on ProviderException catch (error) {
+      GatherLogger.error('VectorTileLoadingCache', 'Ran into issue: $error');
       if (error.statusCode == 404 || error.statusCode == 204) {
         return _emptyTile();
       }
@@ -94,12 +107,20 @@ class VectorTileLoadingCache {
       }
     }
     if (bytes == null) {
+      GatherLogger.error(
+        'VectorTileLoadingCache',
+        'No bytes for tile: $key',
+      );
       return null;
     }
     final name = '$key/${_theme.id}';
     final tileData = await _executor.submit(Job(
         name, _createTile, _ThemeTile(themeId: _theme.id, bytes: bytes),
         cancelled: cancelled, deduplicationKey: name));
+    GatherLogger.info(
+      'VectorTileLoadingCache',
+      'Putting tile data into _tileDataCache for: $key',
+    );
     _tileDataCache.put(key, tileData);
     return tileData;
   }
@@ -132,6 +153,23 @@ Future<void> _setupTheme(Theme theme) async {
   _themeById[theme.id] = theme;
 }
 
-TileData _createTile(_ThemeTile themeTile) =>
+TileData _createTile(_ThemeTile themeTile) {
+  GatherLogger.info('VectorTileLoadingCache', 'Attempting to create tile');
+  try {
     TileFactory(_themeById[themeTile.themeId]!, const Logger.noop())
         .createTileData(VectorTileReader().read(themeTile.bytes));
+
+    GatherLogger.info(
+      'VectorTileLoadingCache',
+      'Successfully created vector tile',
+    );
+  } catch (e) {
+    GatherLogger.info(
+      'VectorTileLoadingCache',
+      'Failed to create vector tile: $e',
+    );
+  }
+
+  return TileFactory(_themeById[themeTile.themeId]!, const Logger.noop())
+      .createTileData(VectorTileReader().read(themeTile.bytes));
+}

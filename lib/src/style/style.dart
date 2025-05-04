@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:vector_map_tiles/vector_map_tiles.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 import '../tile_providers.dart';
@@ -44,6 +45,10 @@ class StyleReader {
   Future<Style> read() async {
     final uriMapper = StyleUriMapper(key: apiKey);
     final url = uriMapper.map(uri);
+    GatherLogger.info(
+      'Style/AtlasProvider',
+      'uriMapper : $url',
+    );
     final styleText = await _httpGet(url);
     final style = await compute(jsonDecode, styleText);
     if (style is! Map<String, dynamic>) {
@@ -68,6 +73,10 @@ class StyleReader {
       centerPoint = null;
     }
     final spriteUri = style['sprite'];
+    GatherLogger.info(
+      'Style/AtlasProvider',
+      'spriteUri : $spriteUri',
+    );
     SpriteStyle? sprites;
     if (spriteUri is String && spriteUri.trim().isNotEmpty) {
       final spriteUris = uriMapper.mapSprite(uri, spriteUri);
@@ -77,11 +86,21 @@ class StyleReader {
           final spritesJsonText = await _httpGet(spriteUri.json);
           spritesJson = await compute(jsonDecode, spritesJsonText);
         } catch (e) {
+          GatherLogger.error(
+            'Style/AtlasProvider',
+            'error : ${spriteUri.json}',
+          );
           logger.log(() => 'error reading sprite uri: ${spriteUri.json}');
           continue;
         }
         sprites = SpriteStyle(
-            atlasProvider: () => _loadBinary(spriteUri.image),
+            atlasProvider: () {
+              GatherLogger.info(
+                'Style/AtlasProvider',
+                'Loading binary from: ${spriteUri.image}',
+              );
+              return _loadBinary(spriteUri.image);
+            },
             index: SpriteIndexReader(logger: logger).read(spritesJson));
         break;
       }
