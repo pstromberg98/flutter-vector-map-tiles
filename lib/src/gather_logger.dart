@@ -12,9 +12,13 @@ class Log {
   DateTime timestamp;
 }
 
+typedef WriteOutFunction = Future<void> Function(String file, Uint8List bytes);
+
 class GatherLogger {
   static final StreamController<Log> _controller = StreamController();
   static final Stream<Log> logStream = _controller.stream;
+
+  static WriteOutFunction? writeOutFunction;
 
   static void info(String tag, String message) {
     print('[$tag] $message');
@@ -26,5 +30,9 @@ class GatherLogger {
     _controller.add(Log(tag: tag, message: message));
   }
 
-  static void writeOut(String file, Uint8List bytes) {}
+  static void writeOut(String file, Uint8List bytes) {
+    if (writeOutFunction != null) {
+      writeOutFunction!(file, bytes);
+    }
+  }
 }

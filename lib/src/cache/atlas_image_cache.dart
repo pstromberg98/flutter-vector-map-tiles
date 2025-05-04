@@ -38,6 +38,10 @@ class AtlasImageCache {
     }
     var loading = _loading;
     if (loading != null) {
+      GatherLogger.info(
+        'AtlasImageCache.retrieve',
+        'Already Loading',
+      );
       return loading.future;
     }
     final loadResult = Completer<Image>();
