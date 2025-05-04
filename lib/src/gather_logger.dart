@@ -16,7 +16,7 @@ typedef WriteOutFunction = Future<void> Function(String file, Uint8List bytes);
 
 class GatherLogger {
   static final StreamController<Log> _controller = StreamController();
-  static final Stream<Log> logStream = _controller.stream;
+  static final Stream<Log> logStream = _controller.stream.asBroadcastStream();
 
   static WriteOutFunction? writeOutFunction;
 
