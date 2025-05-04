@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:executor_lib/executor_lib.dart';
+import 'package:vector_map_tiles/src/gather_logger.dart';
 import 'package:vector_map_tiles/src/raster/images.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
@@ -20,6 +21,11 @@ class AtlasImageCache {
   AtlasImageCache(this._theme, this._atlasProvider, this._delegate);
 
   Future<Image> retrieve() {
+    GatherLogger.info(
+      'AtlasImageCache.retrieve',
+      'Attempting retrieval',
+    );
+
     if (_disposed) {
       return Future.error(CancellationException());
     }
@@ -54,8 +60,20 @@ class AtlasImageCache {
 
   Future<Image> _load() async {
     final key = _key();
+    GatherLogger.info(
+      'AtlasImageCache._load',
+      'atlas key: $key',
+    );
     var bytes = await _delegate.retrieve(key);
+    GatherLogger.info(
+      'AtlasImageCache._load',
+      'cache result: ${bytes == null ? 'miss' : 'hit'}',
+    );
     if (bytes == null) {
+      GatherLogger.info(
+        'AtlasImageCache._load',
+        'Calling atlas provider',
+      );
       bytes = await _atlasProvider();
       await _delegate.put(key, bytes);
     }
