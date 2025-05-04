@@ -20,16 +20,20 @@ class AtlasImageCache {
   AtlasImageCache(this._theme, this._atlasProvider, this._delegate);
 
   Future<Image> retrieve() {
-    GatherLogger.info(
-      'AtlasImageCache.retrieve',
-      'Attempting retrieval',
-    );
-
     if (_disposed) {
+      GatherLogger.info(
+        'AtlasImageCache.retrieve',
+        'cancelled',
+      );
       return Future.error(CancellationException());
     }
     final image = _image;
     if (image != null) {
+      GatherLogger.info(
+        'AtlasImageCache.retrieve',
+        'Image already in memory',
+      );
+
       return Future.value(image);
     }
     var loading = _loading;
