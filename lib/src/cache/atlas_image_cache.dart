@@ -88,6 +88,10 @@ class AtlasImageCache {
       'AtlasImageCache._load',
       'instantiating image code using bytes of length: ${bytes.length}',
     );
+    GatherLogger.writeOut(
+      '${DateTime.now().millisecondsSinceEpoch}_$key',
+      bytes,
+    );
     final codec = await instantiateImageCodec(bytes);
     GatherLogger.info(
       'AtlasImageCache._load',

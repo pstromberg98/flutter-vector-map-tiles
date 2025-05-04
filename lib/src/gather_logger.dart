@@ -31,6 +31,7 @@ class GatherLogger {
   }
 
   static void writeOut(String file, Uint8List bytes) {
+    print('Writing out $file');
     if (writeOutFunction != null) {
       writeOutFunction!(file, bytes);
     }
