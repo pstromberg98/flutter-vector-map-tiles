@@ -11,3 +11,4 @@ export 'src/tile_providers.dart';
 export 'src/vector_tile_layer.dart';
 export 'src/vector_tile_layer_mode.dart';
 export 'src/vector_tile_provider.dart';
+export 'src/gather_logger.dart';
