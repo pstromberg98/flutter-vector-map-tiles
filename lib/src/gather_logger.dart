@@ -21,5 +21,10 @@ class GatherLogger {
     _controller.add(Log(tag: tag, message: message));
   }
 
+  static void error(String tag, String message) {
+    print('\x1B[31m[$tag] $message\x1B[0m');
+    _controller.add(Log(tag: tag, message: message));
+  }
+
   static void writeOut(String file, Uint8List bytes) {}
 }

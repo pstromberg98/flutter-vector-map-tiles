@@ -76,9 +76,22 @@ class AtlasImageCache {
       bytes = await _atlasProvider();
       await _delegate.put(key, bytes);
     }
+    GatherLogger.info(
+      'AtlasImageCache._load',
+      'instantiating image code using bytes of length: ${bytes.length}',
+    );
     final codec = await instantiateImageCodec(bytes);
-    final frame = await codec.getNextFrame();
-    return frame.image;
+    GatherLogger.info(
+      'AtlasImageCache._load',
+      'attempting getNextFrame',
+    );
+    try {
+      final frame = await codec.getNextFrame();
+      return frame.image;
+    } catch (e) {
+      GatherLogger.error('AtlasImageCache._load', e.toString());
+      rethrow;
+    }
   }
 
   String _key() =>
